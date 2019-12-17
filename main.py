@@ -7,7 +7,7 @@ from scheduling import *
 from wasserstein import *
 from estimate import *
 from scipy.stats import skewnorm
-
+#dddd
 def create_world():
     # create the pickup and delivery zones
     pickup_loc = [(x, y) for x in range(4) for y in range(4)]
