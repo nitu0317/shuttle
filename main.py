@@ -145,7 +145,6 @@ true_marginal, true_conds_v, true_conds_r = get_distribution()
 
 est_conds_r = {}
 for param in params:
-    np.random.seed(1234)
     est_cond_r = []
     for i in range(1, n_report):
         samples = [0, 0, 0, 0]
