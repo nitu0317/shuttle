@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from gurobipy import *
 from matplotlib import pyplot as plt
 import collections
@@ -210,7 +211,7 @@ for b in range(n_batch):
 
 # summarize output
 res_conditional, res_report, res_marginal, res_robust, res_robust_single = [], [], [], [], []
-rat_conditional, rat_report, rat_marginal, rat_robust, rat_robust_single = [], [], [], [], []
+can_conditional, can_report, can_marginal, can_robust, can_robust_single = [], [], [], [], []
 
 for i in range(len(params)):
     res_report.append(np.mean([res['report'][i][1] for res in output]))
@@ -219,11 +220,11 @@ for i in range(len(params)):
     res_robust.append(np.mean([res['robust'][i][1] for res in output if res['robust'][i][1] != 0]))
     # res_robust_single.append(np.mean([res['robust_single'][i][1] for res in output if res['robust_single'][i][1] != 0]))
 
-    rat_report.append(np.mean([res['report'][i][1]/res['report'][i][0] for res in output]))
-    rat_marginal.append(np.mean([res['marginal'][i][1]/res['marginal'][i][0] for res in output]))
-    # res_conditional.append(np.mean([res['conditional'][i][1] for res in output]))
-    rat_robust.append(np.mean([res['robust'][i][1]/res['robust'][i][0] for res in output if res['robust'][i][0] != 0]))
-    # rat_robust_single.append(np.mean([res['robust_single'][i][1]/res['robust_single'][i][0] for res in output if res['robust_single'][i][0] != 0]))
+    can_report.append(np.mean([res['report'][i][0] for res in output]))
+    can_marginal.append(np.mean([res['marginal'][i][0] for res in output]))
+    # can_conditional.append(np.mean([res['conditional'][i][0] for res in output]))
+    can_robust.append(np.mean([res['robust'][i][0] for res in output if res['robust'][i][0] != 0]))
+    # can_robust_single.append(np.mean([res['robust_single'][i][0] for res in output if res['robust_single'][i][0] != 0]))
 
 #print(res_conditional)
 print(res_robust)
@@ -231,10 +232,10 @@ print(res_robust)
 print(res_marginal)
 print(res_report)
 
-print(rat_robust)
+print(can_robust)
 # print(rat_robust_single)
-print(rat_marginal)
-print(rat_report)
+print(can_marginal)
+print(can_report)
 
 plt.plot(params, res_marginal, '^--', ms=5.0, lw=1.0, label='marginal')
 plt.plot(params, res_report, 's--', ms=5.0, lw=1.0, label='report')
@@ -245,3 +246,10 @@ plt.legend()
 plt.xlabel('standard deviation')
 plt.ylabel('average adoptions')
 plt.savefig('two_ball_uniform_skew0.png')
+
+df = pd.
+path = 'result.xlsx'
+writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
+df.to_excel(writer, sheet_name = 'two_ball_uniform_skew0')
+writer.save()
+writer.close()
