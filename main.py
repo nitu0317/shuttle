@@ -3,10 +3,9 @@ import pandas as pd
 from gurobipy import *
 from matplotlib import pyplot as plt
 import collections
-import cvxpy as cp
 from scheduling import *
 from wasserstein import *
-from estimate import *
+#from estimate import *
 from scipy.stats import skewnorm
 
 def create_world():
@@ -98,12 +97,12 @@ def adoption_rate(param):
         _lambda = d_mr / (d_cr + d_cm)
 
         delta = {}
-        delta['r'] = d_cr * (1 + _lambda) * 0.5
-        delta['m'] = d_cm * (1 + _lambda) * 0.5
+        delta['r'] = d_cr * _lambda
+        delta['m'] = d_cm * _lambda
         delta['c'] = max(d_cr, d_cm) * 100
 
-        if param < (1 - _lambda) * 0.5:
-            return [], []
+        # if param < (1 - _lambda) * 0.5:
+        #     return [], []
 
         probs_w.append(compute_worst_case(marginal, report, conditional, delta))
 
@@ -128,7 +127,7 @@ scale = 5
 n_serve, n_report = int((n_level-1) / scale) - 1, int((n_level-1) / scale) + 1
 
 # std = 4
-skew = 0
+skew = -2
 stds = [0, 2, 4, 6, 8]
 params = stds
 
@@ -244,11 +243,16 @@ plt.plot(params, res_robust, 'o--', ms=5.0, lw=1.0, label='robust')
 plt.legend()
 plt.xlabel('standard deviation')
 plt.ylabel('average adoptions')
-plt.savefig('two_ball_uniform_skew0.png')
+plt.savefig('two_ball_uniform_skew-2.png')
 
-df = pd.
+df = pd.DataFrame({'Accepted_robust': np.array(res_robust), 'Involved_robust': np.array(can_robust)})
+df['Accepted_marginal'] = np.array(res_marginal)
+df['Involved_marginal'] = np.array(can_marginal)
+df['Accepted_report'] = np.array(res_report)
+df['Involved_report'] = np.array(can_report)
+
 path = 'result.xlsx'
 writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
-df.to_excel(writer, sheet_name = 'two_ball_uniform_skew0')
+df.to_excel(writer, sheet_name = 'two_ball_uniform_skew-2')
 writer.save()
 writer.close()
