@@ -118,6 +118,21 @@ def adoption_rate(param):
 
     return probs_w, probs_w_single
 
+def sampling(n=20):
+    est_conds_r = {}
+    for param in params:
+        est_cond_r = []
+        for i in range(1, n_report):
+            samples = [0, 0, 0, 0]
+            for j in range(n):
+                k = np.random.choice(a=4, p=true_conds_r[param][i])
+                samples[k] += 1
+            est_cond_r.append(np.array(samples) / np.sum(samples))
+        est_cond_r = [est_cond_r[0]] + est_cond_r
+        est_conds_r[param] = est_cond_r
+
+    return est_conds_r
+
 # model parameters
 T = 80
 n_batch = 25
@@ -127,7 +142,7 @@ scale = 5
 n_serve, n_report = int((n_level-1) / scale) - 1, int((n_level-1) / scale) + 1
 
 # std = 4
-skew = -2
+skew = 2
 stds = [0, 2, 4, 6, 8]
 params = stds
 
@@ -142,24 +157,13 @@ for k in range(K):
 
 true_marginal, true_conds_v, true_conds_r = get_distribution()
 
-est_conds_r = {}
-for param in params:
-    est_cond_r = []
-    for i in range(1, n_report):
-        samples = [0, 0, 0, 0]
-        for j in range(20):
-            k = np.random.choice(a=4, p=true_conds_r[param][i])
-            samples[k] += 1
-        est_cond_r.append(np.array(samples) / np.sum(samples))
-    est_cond_r = [est_cond_r[0]] + est_cond_r
-    est_conds_r[param] = est_cond_r
-
 output = []
 for b in range(n_batch):
     result = {'report':[], 'marginal':[], 'conditional':[], 'robust':[], 'robust_single': []}
     print('------Batch %d-------' % b)
 
     true_ods, req_ods_dict, mod_ods, k2q_dict = create_ods(true_marginal, true_conds_v, scale, od_pairs)
+    est_conds_r = sampling()
 
     # ## M3
     # print('conditional')
@@ -243,7 +247,7 @@ plt.plot(params, res_robust, 'o--', ms=5.0, lw=1.0, label='robust')
 plt.legend()
 plt.xlabel('standard deviation')
 plt.ylabel('average adoptions')
-plt.savefig('two_ball_uniform_skew-2.png')
+plt.savefig('two_ball_uniform_skew2.png')
 
 df = pd.DataFrame({'Accepted_robust': np.array(res_robust), 'Involved_robust': np.array(can_robust)})
 df['Accepted_marginal'] = np.array(res_marginal)
@@ -253,6 +257,6 @@ df['Involved_report'] = np.array(can_report)
 
 path = 'result.xlsx'
 writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
-df.to_excel(writer, sheet_name = 'two_ball_uniform_skew-2')
+df.to_excel(writer, sheet_name = 'two_ball_uniform_skew2')
 writer.save()
 writer.close()
