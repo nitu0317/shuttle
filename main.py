@@ -7,6 +7,7 @@ from scheduling import *
 from wasserstein import *
 #from estimate import *
 from scipy.stats import skewnorm
+from openpyxl import load_workbook
 
 def create_world():
     # create the pickup and delivery zones
@@ -76,7 +77,7 @@ def get_distribution():
         true_cond_v = true_conds_v[param]
         true_cond_r = []
         for i in range(n_report):
-            dense = np.array([true_marginal[j] * true_cond_v[j][i] for j in range(1, n_report)])
+            dense = np.array([true_marginal[j] * true_cond_v[j][i] for j in range(1, n_report)]) + 1e-8
             dense = dense / sum(dense)
             true_cond_r.append(dense)
         true_conds_r[param] = true_cond_r
@@ -142,7 +143,7 @@ scale = 5
 n_serve, n_report = int((n_level-1) / scale) - 1, int((n_level-1) / scale) + 1
 
 # std = 4
-skew = 2
+skew = -4
 stds = [0, 2, 4, 6, 8]
 params = stds
 
@@ -247,7 +248,7 @@ plt.plot(params, res_robust, 'o--', ms=5.0, lw=1.0, label='robust')
 plt.legend()
 plt.xlabel('standard deviation')
 plt.ylabel('average adoptions')
-plt.savefig('two_ball_uniform_skew2.png')
+plt.savefig('two_ball_uniform_skew-4.png')
 
 df = pd.DataFrame({'Accepted_robust': np.array(res_robust), 'Involved_robust': np.array(can_robust)})
 df['Accepted_marginal'] = np.array(res_marginal)
@@ -255,8 +256,10 @@ df['Involved_marginal'] = np.array(can_marginal)
 df['Accepted_report'] = np.array(res_report)
 df['Involved_report'] = np.array(can_report)
 
-path = 'result.xlsx'
-writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
-df.to_excel(writer, sheet_name = 'two_ball_uniform_skew2')
+path = "result.xlsx"
+book = load_workbook(path)
+writer = pd.ExcelWriter(path, engine = 'openpyxl')
+writer.book = book
+df.to_excel(writer, sheet_name = 'two_ball_uniform_skew-4')
 writer.save()
 writer.close()
